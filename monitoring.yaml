@@ -1,0 +1,40 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters: 
+
+  InstanceId: 
+    Type: String
+
+
+Resources:
+
+  MySNSTopic:
+    Type: AWS::SNS::Topic
+    Properties:
+      TopicName : ApplicationAlerts
+
+
+  HighCPUAlarm:
+    Type: AWS::CloudWatch::Alarm
+    Properties:
+
+      AlarmName: HighCPUUtilization
+      Namespace: AWS/EC2
+      MetricName: CPUUtilization
+      Statistic: Average
+      Period: 300
+      EvaluationPeriods: 2
+      Threshold: 80
+      ComparisonOperator: GreaterThanThreshold
+      AlarmActions:
+        - !Ref MySNSTopic
+
+      Dimensions:
+        - Name: InstanceId
+          Value: !Ref InstanceId
+
+
+Outputs: 
+
+  SNSTopicArn:
+    Value: !Ref MySNSTopic

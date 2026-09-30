@@ -1,0 +1,76 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Resources:
+
+  MyVPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      CidrBlock: 10.0.0.0/16
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      Tags:
+        - Key: Name
+          Value: MyVPC
+
+  MyPublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: 10.0.2.0/24
+      AvailabilityZone: ap-south-2a
+      MapPublicIpOnLaunch: true
+
+  MyPublicSubnet2:
+    Type: AWS::EC2::Subnet
+    Properties:
+      VpcId: !Ref MyVPC
+      CidrBlock: 10.0.3.0/24
+      AvailabilityZone: ap-south-2b
+      MapPublicIpOnLaunch: true
+
+  MyIGW:
+    Type: AWS::EC2::InternetGateway
+  
+  MyIGWAttachment:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      InternetGatewayId: !Ref MyIGW
+      VpcId: !Ref MyVPC
+  MyPublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref MyVPC
+
+  MyPublicSubnetAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref MyPublicRouteTable
+      SubnetId: !Ref MyPublicSubnet
+
+  MyPublicSubnetAssociation2:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      RouteTableId: !Ref MyPublicRouteTable
+      SubnetId: !Ref MyPublicSubnet2
+
+  MyPublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: MyIGWAttachment
+    Properties:
+      RouteTableId: !Ref MyPublicRouteTable
+      GatewayId: !Ref MyIGW
+      DestinationCidrBlock: 0.0.0.0/0
+    
+
+
+Outputs:
+
+  VpcId:
+    Value: !Ref MyVPC
+
+  PublicSubnetId1:
+    Value: !Ref MyPublicSubnet
+
+  PublicSubnetId2:
+    Value: !Ref MyPublicSubnet2
+   

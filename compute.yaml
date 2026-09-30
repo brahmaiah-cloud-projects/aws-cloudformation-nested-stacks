@@ -1,0 +1,43 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+Parameters:
+
+  PublicSubnetId:
+    Type: String
+
+  MyEC2SecurityGroupId:
+    Type: String
+
+Resources:
+
+  WebServer:
+
+    Type: AWS::EC2::Instance
+
+    Properties:
+
+      InstanceType: t3.micro
+
+      ImageId: ami-0199ac7c9fbf9ed83
+
+      KeyName: Nirmala
+
+      SubnetId: !Ref PublicSubnetId
+
+      SecurityGroupIds:
+        - !Ref MyEC2SecurityGroupId
+
+      UserData:
+        Fn::Base64: |
+          #!/bin/bash
+          apt update -y
+          apt install apache2 -y
+          systemctl enable apache2
+          systemctl start apache2
+          echo "<h1> Hello Mama Form Cloud Formation</h1>" > /var/www/html/index.html
+
+
+Outputs:
+
+  InstanceId: 
+    Value: !Ref WebServer

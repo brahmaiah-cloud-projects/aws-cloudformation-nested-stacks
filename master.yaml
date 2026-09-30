@@ -1,0 +1,75 @@
+AWSTemplateFormatVersion: '2010-09-09'
+
+
+
+Resources:
+
+  NetworkStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://my-cft-projects-templates-mama.s3.ap-south-2.amazonaws.com/network.yaml
+
+
+  SecurityStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://my-cft-projects-templates-mama.s3.ap-south-2.amazonaws.com/security.yaml
+      Parameters:
+        VpcId: !GetAtt
+          - NetworkStack
+          - Outputs.VpcId
+
+  ComputeStack:
+
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://my-cft-projects-templates-mama.s3.ap-south-2.amazonaws.com/compute.yaml
+      Parameters:
+        PublicSubnetId: !GetAtt
+          - NetworkStack
+          - Outputs.PublicSubnetId1
+        MyEC2SecurityGroupId: !GetAtt
+          - SecurityStack
+          - Outputs.MyEC2SecurityGroupId 
+
+
+  ALBStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://my-cft-projects-templates-mama.s3.ap-south-2.amazonaws.com/alb.yaml
+      Parameters:
+        PublicSubnetId1: !GetAtt
+          - NetworkStack
+          - Outputs.PublicSubnetId1
+        PublicSubnetId2: !GetAtt
+          - NetworkStack
+          - Outputs.PublicSubnetId2
+
+        ALBSecurityGroupId: !GetAtt
+          - SecurityStack
+          - Outputs.ALBSecurityGroupId
+
+        VpcId: !GetAtt
+          - NetworkStack
+          - Outputs.VpcId
+
+        InstanceId: !GetAtt
+          - ComputeStack
+          - Outputs.InstanceId
+
+  MonitoringStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: https://my-cft-projects-templates-mama.s3.ap-south-2.amazonaws.com/monitoring.yaml
+
+      Parameters:
+        InstanceId: !GetAtt
+          - ComputeStack
+          - Outputs.InstanceId
+         
+
+
+
+
+  
+

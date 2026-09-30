@@ -1,0 +1,63 @@
+AWSTemplateFormatVersion: 2010-09-09
+
+Parameters:
+
+  PublicSubnetId1:
+    Type: String
+
+  PublicSubnetId2:
+    Type: String
+
+  ALBSecurityGroupId:
+    Type: String
+
+  VpcId:
+    Type: String
+
+  InstanceId: 
+    Type: String
+
+
+Resources:
+  MyALB:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+   
+      Name: MyALB
+      Type: application
+      Scheme: internet-facing
+      Subnets: 
+        - !Ref PublicSubnetId1
+        - !Ref PublicSubnetId2
+      SecurityGroups:
+        - !Ref ALBSecurityGroupId
+
+  MyTargetGroup: 
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: My-Target-Group
+      Protocol: HTTP
+      Port: 80
+      TargetType: instance
+      VpcId: !Ref VpcId
+      Targets:
+        - Id: !Ref InstanceId
+
+  MyListener:
+    Type: AWS::ElasticLoadBalancingV2::Listener
+    Properties:
+      LoadBalancerArn: !Ref MyALB
+      Protocol: HTTP
+      Port: 80
+      DefaultActions:
+        - Type: forward
+          TargetGroupArn: !Ref MyTargetGroup
+
+
+Outputs:
+
+  ALBName:
+    Value: !GetAtt MyALB.DNSName
+
+  ALBArn:
+    Value: !Ref MyALB  	
